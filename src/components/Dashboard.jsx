@@ -2,12 +2,12 @@ import React from 'react';
 import { mockStats, mockAppointments } from '../data/mockData';
 import { Users, CalendarCheck, ClipboardList, Stethoscope } from 'lucide-react';
 
-export default function Dashboard() {
+export default function Dashboard({ setCurrentView, onNewAppointment }) {
   const statCards = [
-    { label: 'Total Patients', value: mockStats.totalPatients, icon: Users, color: 'primary' },
-    { label: "Today's Appointments", value: mockStats.todayAppointments, icon: CalendarCheck, color: 'success' },
-    { label: 'Pending Reports', value: mockStats.pendingReports, icon: ClipboardList, color: 'warning' },
-    { label: 'Active Staff', value: mockStats.activeStaff, icon: Stethoscope, color: 'danger' }
+    { label: 'Total Patients', value: mockStats.totalPatients, icon: Users, color: 'primary', view: 'patients' },
+    { label: "Today's Appointments", value: mockStats.todayAppointments, icon: CalendarCheck, color: 'success', view: 'appointments' },
+    { label: 'Pending Reports', value: mockStats.pendingReports, icon: ClipboardList, color: 'warning', view: 'analytics' },
+    { label: 'Active Staff', value: mockStats.activeStaff, icon: Stethoscope, color: 'danger', view: null }
   ];
 
   return (
@@ -18,7 +18,7 @@ export default function Dashboard() {
           <p className="text-muted">Welcome back, Dr. Smith</p>
         </div>
         <div className="header-actions">
-          <button className="btn btn-primary">+ New Appointment</button>
+          <button className="btn btn-primary" onClick={onNewAppointment}>+ New Appointment</button>
         </div>
       </header>
 
@@ -26,7 +26,12 @@ export default function Dashboard() {
         {statCards.map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div key={idx} className="stat-card glass-surface">
+            <div
+              key={idx}
+              className={`stat-card glass-surface ${stat.view ? 'stat-card-clickable' : ''}`}
+              onClick={() => stat.view && setCurrentView(stat.view)}
+              title={stat.view ? `Go to ${stat.label}` : ''}
+            >
               <div className={`stat-icon bg-${stat.color}`}>
                 <Icon size={24} />
               </div>
@@ -34,16 +39,22 @@ export default function Dashboard() {
                 <h3>{stat.value}</h3>
                 <p className="text-muted">{stat.label}</p>
               </div>
+              {stat.view && <div className="stat-arrow">→</div>}
             </div>
           );
         })}
       </div>
 
-      <div className="dashboard-content grid flex gap-6 mt-6">
+      <div className="dashboard-content flex gap-6 mt-6">
         <div className="upcoming-appointments glass-surface flex-col flex" style={{ flex: 2 }}>
           <div className="card-header flex justify-between items-center">
             <h2 className="text-xl">Upcoming Appointments</h2>
-            <button className="btn btn-ghost text-sm">View All</button>
+            <button
+              className="btn btn-ghost text-sm"
+              onClick={() => setCurrentView('appointments')}
+            >
+              View All →
+            </button>
           </div>
           <div className="appointments-list">
             {mockAppointments.map(app => (
@@ -67,7 +78,7 @@ export default function Dashboard() {
         </div>
 
         <div className="recent-activity glass-surface flex-col flex" style={{ flex: 1 }}>
-           <div className="card-header">
+          <div className="card-header">
             <h2 className="text-xl">Recent Activity</h2>
           </div>
           <div className="activity-list">
@@ -86,6 +97,16 @@ export default function Dashboard() {
               <p className="text-sm">Meeting with Dr. Adams rescheduled.</p>
               <span className="text-xs text-muted">Yesterday</span>
             </div>
+            <div className="activity-item">
+              <div className="activity-dot primary"></div>
+              <p className="text-sm">Prescription updated for <strong>James Taylor</strong>.</p>
+              <span className="text-xs text-muted">Yesterday</span>
+            </div>
+          </div>
+          <div className="card-footer">
+            <button className="btn btn-ghost full-width" onClick={() => setCurrentView('analytics')}>
+              View Analytics →
+            </button>
           </div>
         </div>
       </div>
